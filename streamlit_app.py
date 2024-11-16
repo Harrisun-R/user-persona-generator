@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 from io import BytesIO
 from fpdf import FPDF
 import random
+import json
 
 # Set up the Streamlit app
 st.title("User Persona Generator")

@@ -107,16 +107,23 @@ pdf.set_auto_page_break(auto=True, margin=15)
 pdf.add_page()
 pdf.set_font("Arial", size=12)
 
+# Add persona details to the PDF
 pdf.cell(200, 10, txt="User Persona Details", ln=True, align="C")
 for index, row in persona_df.iterrows():
-    pdf.cell(200, 10, txt=f"{row['Category']}: {row['Details']}", ln=True, align="L")
+    pdf.cell(0, 10, txt=f"{row['Category']}: {row['Details']}", ln=True, align="L")
 
-# Convert PDF to bytes and provide download link
+# Write the PDF to a BytesIO object
 pdf_bytes = BytesIO()
-pdf.output(pdf_bytes)
-pdf_bytes.seek(0)
+pdf.output(pdf_bytes, 'F')
+pdf_bytes.seek(0) 
 
-st.download_button("Download Persona as PDF", pdf_bytes, file_name="user_persona.pdf", mime="application/pdf")
+# Provide a download link for the PDF
+st.download_button(
+    label="Download Persona as PDF",
+    data=pdf_bytes,
+    file_name="user_persona.pdf",
+    mime="application/pdf"
+)
 
 # Step 8: Real-Time Collaboration
 st.header("Real-Time Collaboration (Work-in-progress)")

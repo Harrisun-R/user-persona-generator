@@ -13,133 +13,91 @@ st.write(f"Developed by Harrisun Raj Mohan")
 st.write(f"[Connect on LinkedIn](https://www.linkedin.com/in/harrisun-raj-mohan/)")
 st.write("Create detailed user personas based on input information. Align product strategies with target audiences effectively.")
 
-# Step 1: User Inputs for Persona Details
-st.header("User Persona Details")
+personas = []
 
-# Persona Template Suggestions
-persona_templates = ["Tech-Savvy Millennial", "Working Parent", "Senior Citizen", "Frequent Traveler", "Fitness Enthusiast"]
-persona_template = st.selectbox("Choose a Persona Template", persona_templates)
+# Step 1: Input persona details
+st.header("Create User Personas")
+num_personas = st.number_input("Number of personas to create", min_value=1, max_value=10, value=1, step=1)
 
-# Input fields for Demographics
-st.subheader("Demographics")
-age = st.slider("Age", 18, 65, 30)
-gender = st.selectbox("Gender", ["Male", "Female", "Non-Binary", "Other"])
-location = st.text_input("Location", "New York")
-occupation = st.text_input("Occupation", "Software Engineer")
+for i in range(num_personas):
+    st.subheader(f"Persona {i + 1}")
+    name = st.text_input(f"Name for Persona {i + 1}")
+    age = st.number_input(f"Age for Persona {i + 1}", min_value=0, max_value=120, value=25)
+    location = st.text_input(f"Location for Persona {i + 1}")
+    behavior = st.text_area(f"Behavior for Persona {i + 1}")
+    needs = st.text_area(f"Needs for Persona {i + 1}")
+    pain_points = st.text_area(f"Pain Points for Persona {i + 1}")
 
-# Behavioral Inputs
-st.subheader("Behaviors")
-interests = st.text_area("List Interests (separate by commas)", "e.g., technology, fitness, travel")
-frequency = st.selectbox("Frequency of Product Use", ["Daily", "Weekly", "Monthly", "Rarely"])
+    if st.button(f"Add Persona {i + 1}"):
+        personas.append({
+            "Name": name,
+            "Age": age,
+            "Location": location,
+            "Behavior": behavior,
+            "Needs": needs,
+            "Pain Points": pain_points
+        })
+        st.success(f"Persona {i + 1} added successfully!")
 
-# Needs and Pain Points
-st.subheader("Needs and Pain Points")
-needs = st.text_area("What are their primary needs?", "e.g., convenience, efficiency, affordability")
-pain_points = st.text_area("What are their pain points?", "e.g., lack of time, high cost, complexity")
+# Display all personas
+if personas:
+    st.header("Created Personas")
+    personas_df = pd.DataFrame(personas)
+    st.write(personas_df)
 
-# Step 2: Generate Persona Summary
-st.header("Generated Persona Summary")
+    # Step 2: Export personas as JSON
+    st.subheader("Export Personas as JSON")
+    personas_json = json.dumps(personas, indent=4)
+    st.download_button(
+        label="Download Personas as JSON",
+        data=personas_json,
+        file_name="personas.json",
+        mime="application/json"
+    )
 
-# Creating a DataFrame to display persona details
-persona_data = {
-    "Category": ["Age", "Gender", "Location", "Occupation", "Interests", "Frequency of Product Use", "Needs", "Pain Points", "Persona Template"],
-    "Details": [age, gender, location, occupation, interests, frequency, needs, pain_points, persona_template]
-}
+# Step 3: Import personas from JSON
+st.subheader("Import Personas from JSON")
+uploaded_file = st.file_uploader("Upload a JSON file with personas", type="json")
+if uploaded_file:
+    imported_personas = json.load(uploaded_file)
+    st.success("Personas imported successfully!")
+    st.write(imported_personas)
 
-persona_df = pd.DataFrame(persona_data)
+    # Merge imported personas with the current ones
+    personas.extend(imported_personas)
+    personas_df = pd.DataFrame(personas)
+    st.write(personas_df)
 
-# Displaying the DataFrame
-st.write("### Persona Overview")
-st.dataframe(persona_df)
+# Step 4: Export personas as PDF
+if personas:
+    st.header("Export Personas as PDF")
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt="User Persona Details", ln=True, align="C")
 
-# Step 3: Persona Comparison
-# If there are multiple personas generated, compare them here
-persona_comparison = st.checkbox("Enable Persona Comparison")
+    for persona in personas:
+        pdf.cell(0, 10, txt=f"Name: {persona['Name']}", ln=True, align="L")
+        pdf.cell(0, 10, txt=f"Age: {persona['Age']}", ln=True, align="L")
+        pdf.cell(0, 10, txt=f"Location: {persona['Location']}", ln=True, align="L")
+        pdf.cell(0, 10, txt=f"Behavior: {persona['Behavior']}", ln=True, align="L")
+        pdf.cell(0, 10, txt=f"Needs: {persona['Needs']}", ln=True, align="L")
+        pdf.cell(0, 10, txt=f"Pain Points: {persona['Pain Points']}", ln=True, align="L")
+        pdf.cell(0, 10, txt="", ln=True, align="L")  # Blank line between personas
 
-if persona_comparison:
-    st.write("### Persona Comparison")
-    # Allow users to input details for multiple personas
-    personas = []
-    for i in range(2):
-        st.write(f"**Persona {i+1}:**")
-        persona_data_comparison = {
-            "Category": ["Age", "Gender", "Location", "Occupation", "Interests", "Frequency of Product Use", "Needs", "Pain Points"],
-            "Details": [st.slider(f"Age for Persona {i+1}", 18, 65, 30),
-                        st.selectbox(f"Gender for Persona {i+1}", ["Male", "Female", "Non-Binary", "Other"]),
-                        st.text_input(f"Location for Persona {i+1}", "New York"),
-                        st.text_input(f"Occupation for Persona {i+1}", "Software Engineer"),
-                        st.text_area(f"List Interests for Persona {i+1}", "e.g., technology, fitness, travel"),
-                        st.selectbox(f"Frequency of Product Use for Persona {i+1}", ["Daily", "Weekly", "Monthly", "Rarely"]),
-                        st.text_area(f"What are their primary needs for Persona {i+1}?", "e.g., convenience, efficiency, affordability"),
-                        st.text_area(f"What are their pain points for Persona {i+1}?", "e.g., lack of time, high cost, complexity")]
-        }
-        personas.append(pd.DataFrame(persona_data_comparison))
-    st.write(pd.concat(personas))
+    # Save PDF and provide download link
+    temp_file = "temp_personas.pdf"
+    pdf.output(temp_file)
+    with open(temp_file, "rb") as f:
+        pdf_bytes = f.read()
 
-# Step 4: Persona Scoring
-st.header("Persona Scoring")
-persona_score = st.slider("Score the Persona on Likelihood to Convert", 1, 10, 7)
-st.write(f"Persona Score: {persona_score}/10")
-
-# Step 5: Visualization of Needs and Pain Points
-st.header("Needs and Pain Points Visualization")
-needs_pain_points = {"Needs": needs, "Pain Points": pain_points}
-needs_pain_points_df = pd.DataFrame(list(needs_pain_points.items()), columns=["Category", "Details"])
-
-fig = px.bar(needs_pain_points_df, x="Category", y="Details", title="Needs and Pain Points")
-st.plotly_chart(fig)
-
-# Step 6: Demographic Distribution Visualization
-st.header("Demographic Distribution Visualization")
-age_distribution = [random.randint(18, 65) for _ in range(100)]
-location_distribution = random.choices(["New York", "Los Angeles", "Chicago", "San Francisco"], k=100)
-location_df = pd.DataFrame({"Location": location_distribution})
-location_chart = location_df["Location"].value_counts().reset_index()
-location_chart.columns = ["Location", "Count"]
-
-fig = px.bar(location_chart, x="Location", y="Count", title="Demographic Distribution by Location")
-st.plotly_chart(fig)
-
-# Step 7: Export Persona as PDF
-st.header("Export Persona as PDF")
-
-# Create a PDF
-pdf = FPDF()
-pdf.set_auto_page_break(auto=True, margin=15)
-pdf.add_page()
-pdf.set_font("Arial", size=12)
-
-# Add persona details to the PDF
-pdf.cell(200, 10, txt="User Persona Details", ln=True, align="C")
-for index, row in persona_df.iterrows():
-    pdf.cell(0, 10, txt=f"{row['Category']}: {row['Details']}", ln=True, align="L")
-
-# Save the PDF to a temporary file
-temp_file = "temp_persona.pdf"
-pdf.output(temp_file)
-
-# Read the PDF file as binary
-with open(temp_file, "rb") as f:
-    pdf_bytes = f.read()
-
-# Provide a download link for the PDF
-st.download_button(
-    label="Download Persona as PDF",
-    data=pdf_bytes,
-    file_name="user_persona.pdf",
-    mime="application/pdf"
-)
-
-# Step 8: Real-Time Collaboration
-st.header("Real-Time Collaboration (Work-in-progress)")
-st.write("Share this link with others to collaborate on building the persona in real-time.")
-
-# Step 9: Dynamic Trait Generation Based on Inputs
-st.header("Dynamic Trait Generation")
-if "tech-savvy" in interests.lower():
-    st.write("This persona is likely to prefer cutting-edge technology, apps, and devices.")
-if "fitness" in interests.lower():
-    st.write("This persona values health and fitness, prefers products related to exercise and well-being.")
+    st.download_button(
+        label="Download Personas as PDF",
+        data=pdf_bytes,
+        file_name="user_personas.pdf",
+        mime="application/pdf"
+    )
     
 # Step 10: Thank You Message
 st.write("Thank you for using the User Persona Generator!")

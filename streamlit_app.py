@@ -89,15 +89,16 @@ needs_pain_points_df = pd.DataFrame(list(needs_pain_points.items()), columns=["C
 fig = px.bar(needs_pain_points_df, x="Category", y="Details", title="Needs and Pain Points")
 st.plotly_chart(fig)
 
-# Step 6: Demographic Heatmap
-st.header("Demographic Heatmap")
+# Step 6: Demographic Distribution Visualization
+st.header("Demographic Distribution Visualization")
 age_distribution = [random.randint(18, 65) for _ in range(100)]
 location_distribution = random.choices(["New York", "Los Angeles", "Chicago", "San Francisco"], k=100)
-age_df = pd.DataFrame({"Age": age_distribution, "Location": location_distribution})
+location_df = pd.DataFrame({"Location": location_distribution})
+location_chart = location_df["Location"].value_counts().reset_index()
+location_chart.columns = ["Location", "Count"]
 
-age_heatmap = px.density_mapbox(age_df, lat="Age", lon="Location", z="Age", radius=10,
-                                mapbox_style="open-street-map", title="Demographic Heatmap")
-st.plotly_chart(age_heatmap)
+fig = px.bar(location_chart, x="Location", y="Count", title="Demographic Distribution by Location")
+st.plotly_chart(fig)
 
 # Step 7: Export Persona as PDF
 st.header("Export Persona as PDF")

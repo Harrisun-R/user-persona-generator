@@ -102,6 +102,8 @@ st.plotly_chart(fig)
 
 # Step 7: Export Persona as PDF
 st.header("Export Persona as PDF")
+
+# Create a PDF
 pdf = FPDF()
 pdf.set_auto_page_break(auto=True, margin=15)
 pdf.add_page()
@@ -112,10 +114,13 @@ pdf.cell(200, 10, txt="User Persona Details", ln=True, align="C")
 for index, row in persona_df.iterrows():
     pdf.cell(0, 10, txt=f"{row['Category']}: {row['Details']}", ln=True, align="L")
 
-# Write the PDF to a BytesIO object
-pdf_bytes = BytesIO()
-pdf.output(pdf_bytes, 'F')
-pdf_bytes.seek(0) 
+# Save the PDF to a temporary file
+temp_file = "temp_persona.pdf"
+pdf.output(temp_file)
+
+# Read the PDF file as binary
+with open(temp_file, "rb") as f:
+    pdf_bytes = f.read()
 
 # Provide a download link for the PDF
 st.download_button(

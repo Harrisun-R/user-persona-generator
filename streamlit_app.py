@@ -71,28 +71,28 @@ st.write("Create detailed user personas manually or with AI assistance.")
 personas = []
 
 # Step 1: Manual Input
-with st.expander("Create User Personas Manually", *, expanded=False, icon="📌", width="stretch")# st.header("📌 Create User Personas Manually")
-    num_personas = st.number_input("Number of personas to create", min_value=1, max_value=10, value=1, step=1)
+# st.header("📌 Create User Personas Manually")
+num_personas = st.number_input("Number of personas to create", min_value=1, max_value=10, value=1, step=1)
 
-    for i in range(num_personas):
-        st.subheader(f"Persona {i + 1}")
-        name = st.text_input(f"Name for Persona {i + 1}")
-        age = st.number_input(f"Age for Persona {i + 1}", min_value=0, max_value=120, value=25)
-        location = st.text_input(f"Location for Persona {i + 1}")
-        behavior = st.text_area(f"Behavior for Persona {i + 1}")
-        needs = st.text_area(f"Needs for Persona {i + 1}")
-        pain_points = st.text_area(f"Pain Points for Persona {i + 1}")
-    
-        if st.button(f"Add Persona {i + 1}"):
-            personas.append({
-                "Name": name,
-                "Age": age,
-                "Location": location,
-                "Behavior": behavior,
-                "Needs": needs,
-                "Pain Points": pain_points
-            })
-            st.success(f"Persona {i + 1} added successfully!")
+for i in range(num_personas):
+    st.subheader(f"Persona {i + 1}")
+    name = st.text_input(f"Name for Persona {i + 1}")
+    age = st.number_input(f"Age for Persona {i + 1}", min_value=0, max_value=120, value=25)
+    location = st.text_input(f"Location for Persona {i + 1}")
+    behavior = st.text_area(f"Behavior for Persona {i + 1}")
+    needs = st.text_area(f"Needs for Persona {i + 1}")
+    pain_points = st.text_area(f"Pain Points for Persona {i + 1}")
+
+    if st.button(f"Add Persona {i + 1}"):
+        personas.append({
+            "Name": name,
+            "Age": age,
+            "Location": location,
+            "Behavior": behavior,
+            "Needs": needs,
+            "Pain Points": pain_points
+        })
+        st.success(f"Persona {i + 1} added successfully!")
 
 # Step 2: AI Persona Generator
 st.header("✨ Generate Personas with AI")

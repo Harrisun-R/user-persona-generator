@@ -29,10 +29,12 @@ def generate_persona_with_ai(prompt):
             {"role": "system", "content": "You are an expert product researcher."},
             {
                 "role": "user",
-                "content": f"""Generate a user persona for: {prompt}.
+                "content": f"""
+                                Generate a user persona for: {prompt}.
                                 Return ONLY valid JSON with fields:
                                 Name (string), Age (int), Location (string), Behavior (string), Needs (string), Pain Points (string).
-                                No explanations, no extra text, just JSON."""
+                                No explanations, no extra text, just JSON.
+                            """
             }
         ]
     }

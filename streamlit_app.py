@@ -2,22 +2,62 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
-from io import BytesIO
 from fpdf import FPDF
-import random
+import requests
 import json
 
-# Set up the Streamlit app
-st.title("User Persona Generator")
-st.write(f"Developed by Harrisun Raj Mohan")
-st.write(f"[Connect on LinkedIn](https://www.linkedin.com/in/harrisun-raj-mohan/)")
-st.write("Create detailed user personas based on input information. Align product strategies with target audiences effectively.")
+# --------------------------
+# 🔑 API Configuration
+# --------------------------
+OPENROUTER_API_KEY = st.secrets.get("OPENROUTER_API_KEY", "your_api_key_here")  # Use Streamlit secrets for safety
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+OPENROUTER_MODEL = "openai/gpt-oss-20b:free"
+
+def generate_persona_with_ai(prompt):
+    """Generate a user persona using OpenRouter AI."""
+    headers = {
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://your-site-url.com",  # Optional
+        "X-Title": "User Persona Generator App",       # Optional
+    }
+
+    data = {
+        "model": OPENROUTER_MODEL,
+        "messages": [
+            {"role": "system", "content": "You are an expert product researcher. Generate user personas in structured JSON format."},
+            {"role": "user", "content": f"Generate a user persona for: {prompt}. Return JSON with fields: Name, Age, Location, Behavior, Needs, Pain Points."}
+        ]
+    }
+
+    response = requests.post(OPENROUTER_URL, headers=headers, data=json.dumps(data))
+    
+    if response.status_code == 200:
+        try:
+            result = response.json()
+            ai_text = result["choices"][0]["message"]["content"]
+            persona = json.loads(ai_text)  # Expect AI to return structured JSON
+            return persona
+        except Exception as e:
+            st.error(f"Error parsing AI response: {e}")
+            return None
+    else:
+        st.error(f"API Error: {response.text}")
+        return None
+
+
+# --------------------------
+# Streamlit UI
+# --------------------------
+st.title("🤖 User Persona Generator (Enhanced with AI)")
+st.write("Developed by Harrisun Raj Mohan")
+st.write("[Connect on LinkedIn](https://www.linkedin.com/in/harrisun-raj-mohan/)")
+st.write("Create detailed user personas manually or with AI assistance.")
 
 personas = []
 
-# Step 1: Input persona details
-st.header("Create User Personas")
+# Step 1: Manual Input
+st.header("📌 Create User Personas Manually")
 num_personas = st.number_input("Number of personas to create", min_value=1, max_value=10, value=1, step=1)
 
 for i in range(num_personas):
@@ -40,14 +80,28 @@ for i in range(num_personas):
         })
         st.success(f"Persona {i + 1} added successfully!")
 
-# Display all personas
+# Step 2: AI Persona Generator
+st.header("✨ Generate Personas with AI")
+ai_prompt = st.text_area("Describe the target audience or context (e.g., 'college students in Bangalore who use fintech apps')")
+
+if st.button("Generate Persona with AI"):
+    if ai_prompt.strip():
+        ai_persona = generate_persona_with_ai(ai_prompt)
+        if ai_persona:
+            personas.append(ai_persona)
+            st.success("AI Persona generated and added successfully!")
+            st.json(ai_persona)
+    else:
+        st.warning("Please enter a description for the AI to generate a persona.")
+
+# Step 3: Display Personas
 if personas:
-    st.header("Created Personas")
+    st.header("👥 Created Personas")
     personas_df = pd.DataFrame(personas)
     st.write(personas_df)
 
-    # Step 2: Export personas as JSON
-    st.subheader("Export Personas as JSON")
+    # Export JSON
+    st.subheader("📤 Export Personas as JSON")
     personas_json = json.dumps(personas, indent=4)
     st.download_button(
         label="Download Personas as JSON",
@@ -56,22 +110,18 @@ if personas:
         mime="application/json"
     )
 
-# Step 3: Import personas from JSON
-st.subheader("Import Personas from JSON")
+# Step 4: Import JSON
+st.subheader("📥 Import Personas from JSON")
 uploaded_file = st.file_uploader("Upload a JSON file with personas", type="json")
 if uploaded_file:
     imported_personas = json.load(uploaded_file)
     st.success("Personas imported successfully!")
     st.write(imported_personas)
-
-    # Merge imported personas with the current ones
     personas.extend(imported_personas)
-    personas_df = pd.DataFrame(personas)
-    st.write(personas_df)
 
-# Step 4: Export personas as PDF
+# Step 5: Export PDF
 if personas:
-    st.header("Export Personas as PDF")
+    st.header("📑 Export Personas as PDF")
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
@@ -79,15 +129,14 @@ if personas:
     pdf.cell(200, 10, txt="User Persona Details", ln=True, align="C")
 
     for persona in personas:
-        pdf.cell(0, 10, txt=f"Name: {persona['Name']}", ln=True, align="L")
-        pdf.cell(0, 10, txt=f"Age: {persona['Age']}", ln=True, align="L")
-        pdf.cell(0, 10, txt=f"Location: {persona['Location']}", ln=True, align="L")
-        pdf.cell(0, 10, txt=f"Behavior: {persona['Behavior']}", ln=True, align="L")
-        pdf.cell(0, 10, txt=f"Needs: {persona['Needs']}", ln=True, align="L")
-        pdf.cell(0, 10, txt=f"Pain Points: {persona['Pain Points']}", ln=True, align="L")
-        pdf.cell(0, 10, txt="", ln=True, align="L")  # Blank line between personas
+        pdf.cell(0, 10, txt=f"Name: {persona.get('Name', '')}", ln=True, align="L")
+        pdf.cell(0, 10, txt=f"Age: {persona.get('Age', '')}", ln=True, align="L")
+        pdf.cell(0, 10, txt=f"Location: {persona.get('Location', '')}", ln=True, align="L")
+        pdf.cell(0, 10, txt=f"Behavior: {persona.get('Behavior', '')}", ln=True, align="L")
+        pdf.cell(0, 10, txt=f"Needs: {persona.get('Needs', '')}", ln=True, align="L")
+        pdf.cell(0, 10, txt=f"Pain Points: {persona.get('Pain Points', '')}", ln=True, align="L")
+        pdf.cell(0, 10, txt="", ln=True, align="L")
 
-    # Save PDF and provide download link
     temp_file = "temp_personas.pdf"
     pdf.output(temp_file)
     with open(temp_file, "rb") as f:
@@ -99,6 +148,6 @@ if personas:
         file_name="user_personas.pdf",
         mime="application/pdf"
     )
-    
-# Step 10: Thank You Message
-st.write("Thank you for using the User Persona Generator!")
+
+# Footer
+st.write("✅ Thank you for using the AI-powered User Persona Generator!")

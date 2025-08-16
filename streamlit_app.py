@@ -9,7 +9,7 @@ import json
 # --------------------------
 # 🔑 API Configuration
 # --------------------------
-OPENROUTER_API_KEY = st.secrets.get([openrouter], [api_key])  # Use Streamlit secrets for safety
+OPENROUTER_API_KEY = st.secrets["openrouter"]["api_key"]
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 OPENROUTER_MODEL = "openai/gpt-oss-20b:free"
 

@@ -71,7 +71,7 @@ st.write("Create detailed user personas manually or with AI assistance.")
 personas = []
 
 # Step 1: Manual Input
-st.expander("📌 Create User Personas Manually", expanded=False, *, icon=None, width="stretch")# st.header("📌 Create User Personas Manually")
+st.expander("Create User Personas Manually", expanded=False, , icon="📌", width="stretch")# st.header("📌 Create User Personas Manually")
 num_personas = st.number_input("Number of personas to create", min_value=1, max_value=10, value=1, step=1)
 
 for i in range(num_personas):

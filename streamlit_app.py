@@ -14,7 +14,6 @@ OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 OPENROUTER_MODEL = "openai/gpt-oss-20b:free"
 
 def generate_persona_with_ai(prompt):
-    def generate_persona_with_ai(prompt):
     """Generate a user persona using OpenRouter AI."""
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",

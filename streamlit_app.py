@@ -14,6 +14,7 @@ OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 OPENROUTER_MODEL = "openai/gpt-oss-20b:free"
 
 def generate_persona_with_ai(prompt):
+    def generate_persona_with_ai(prompt):
     """Generate a user persona using OpenRouter AI."""
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
@@ -25,8 +26,17 @@ def generate_persona_with_ai(prompt):
     data = {
         "model": OPENROUTER_MODEL,
         "messages": [
-            {"role": "system", "content": "You are an expert product researcher. Generate user personas in structured JSON format."},
-            {"role": "user", "content": f"Generate a user persona for: {prompt}. Return JSON with fields: Name, Age, Location, Behavior, Needs, Pain Points."}
+            {"role": "system", "content": "You are an expert product researcher."},
+            {
+                "role": "user",
+                "content": f"""
+Generate a user persona for: {prompt}.
+
+Return ONLY valid JSON with fields:
+Name (string), Age (int), Location (string), Behavior (string), Needs (string), Pain Points (string).
+No explanations, no extra text, just JSON.
+"""
+            }
         ]
     }
 
@@ -35,16 +45,22 @@ def generate_persona_with_ai(prompt):
     if response.status_code == 200:
         try:
             result = response.json()
-            ai_text = result["choices"][0]["message"]["content"]
-            persona = json.loads(ai_text)  # Expect AI to return structured JSON
+            ai_text = result["choices"][0]["message"]["content"].strip()
+
+            # 🛠 Ensure we extract JSON only (in case AI wraps it in text)
+            if ai_text.startswith("```"):
+                ai_text = ai_text.strip("```json").strip("```").strip()
+
+            persona = json.loads(ai_text)  # Parse into dict
             return persona
+
         except Exception as e:
             st.error(f"Error parsing AI response: {e}")
+            st.write("🔍 Raw AI Response:", ai_text)  # Debug output
             return None
     else:
-        st.error(f"API Error: {response.text}")
+        st.error(f"API Error {response.status_code}: {response.text}")
         return None
-
 
 # --------------------------
 # Streamlit UI
